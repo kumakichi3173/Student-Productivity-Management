@@ -20,5 +20,6 @@ Deliverable 2 (Due: 2/12/2023)
 
 ・”アウトプット画面へ進むボタン（次へ）”を教師が押した後に開かれるアウトプット画面の機能とUIに移る。
 
-・
+![Management System Project -1](https://user-images.githubusercontent.com/30059275/212574573-9652959a-fdee-491f-99c2-59ebea0dce47.jpg)
+
 
