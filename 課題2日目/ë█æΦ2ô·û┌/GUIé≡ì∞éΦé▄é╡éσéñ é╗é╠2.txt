@@ -1,0 +1,360 @@
+GUIを作りましょう その2
+2023.2.5
+
+
+登録されたデータを元に、UIを作成していきます。
+
+まずはデータの作成とアクセス方法を復習します。
+
+
+# ソートの動きを確認するために、生徒B -> 生徒Aの順番に登録しています。
+data = {
+  ('生徒B', '幅跳び'): (30, 0),
+  ('生徒A', 'ハードル50m走'): (5, 90)
+}
+
+
+sort + data.items() でキーが昇順に並んだ状態でデータを取り出します。
+
+for item in sorted(data.items()):
+  print(item)
+
+
+実行結果は以下の通りです。
+
+(('生徒A', 'ハードル50m走'), (5, 90))
+(('生徒B', '幅跳び'), (30, 0))
+
+
+for分のsorted()の呼び出しをなくすと、登録した順番で表示されます。
+(余力があれば確かめましょう）
+
+-----
+
+
+出力される1レコードは、(キー1, キー2),　(データ1, データ2)という構成となっています。
+
+上の例では、
+  キー1    生徒A
+  キー2    ハードル50m走
+  データ1  5
+  データ2  90
+となります。
+
+
+タプルにアクセスする方法を確認します。
+
+ひとつめの方法:
+
+for item in sorted(data.items()):
+  key, datum = item
+  print(key)
+  print(datum)
+  print()
+
+
+注)
+datumは、dataの単数形です。
+(dataは、datumの複数形といったほうがわかりやすいか)
+
+
+itemをkey, datumに分割するように代入します。
+実行結果は以下のようになります。
+
+('生徒A', 'ハードル50m走')
+(5, 90)
+
+('生徒B', '幅跳び')
+(30, 0)
+
+
+バグりました
+  key, datum = item
+と書くべきところを
+  key, data = item
+と書いてバグりました。
+dataが上書きされるので、その後に同じfor文を実行しようとするとエラーになります。
+
+
+--
+
+ふたつめの方法:
+
+分割することが決まっているので、もう少しシンプルにコードを書けます。
+
+for key, datum in sorted(data.items()):
+  print(key)
+  print(datum)
+  print()
+
+itemというあまり必要のない変数を消すことができました。
+実行結果はひとつめを同じになります。
+
+
+--
+
+
+みっつめの方法:
+
+データに通し番号をつけたい場合の方法です。
+
+for i, (key, datum) in enumerate(sorted(data.items())):
+  print(i)
+  print(key)
+  print(datum)
+  print()
+
+
+実行結果は、以下のようになります。
+0
+('生徒A', 'ハードル50m走')
+(5, 90)
+
+1
+('生徒B', '幅跳び')
+(30, 0)
+
+
+--
+
+通し番号を0以外にすることも可能です。
+
+for i, (key, datum) in enumerate(sorted(data.items()), 1):
+  print(i)
+  print(key)
+  print(datum)
+  print()
+
+
+enumerate()の引数に通し番号の初期値を追加します。
+上のコードでは1にしていますが、これを10にすると通し番号が10からに変化します。
+
+実行結果は以下のようになります。
+
+1
+('生徒A', 'ハードル50m走')
+(5, 90)
+
+2
+('生徒B', '幅跳び')
+(30, 0)
+
+--
+
+最後にキーと値のそれぞれがタプルなので、要素を取り出す方法を確認します。
+配列と同じようにkey[0]として、タプルから値を取得します。
+
+for i, (key, datum) in enumerate(sorted(data.items()), 1):
+  print(i, key[0], key[1], datum[0], datum[1])
+  print()
+
+
+実行結果は、以下のようになります。
+
+1 生徒A ハードル50m走 5 90
+
+2 生徒B 幅跳び 30 0
+
+--
+
+f'...'を使うと簡単に出力を整形することができます。
+
+for i, (key, datum) in enumerate(sorted(data.items()), 1):
+  print(f'{i}: {key[0]} - {key[1]} = {datum[0]}回, 居残り時間: {datum[1]}分')
+
+
+出力結果は以下のようになります。
+
+1: 生徒A - ハードル50m走 = 5回, 居残り時間: 90分
+2: 生徒B - 幅跳び = 30回, 居残り時間: 0分
+
+
+-----
+
+データのアクセス方法をだいたい決めたので、これをもとにUIを作成していきます。
+
+簡単な実装にするために、Listboxでdataの内容を表示するコードを作成してみます。
+
+sample_list1.py
+
+<----- sample_list1.py ----->
+import tkinter as tk
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("List UI")
+    self.master.geometry("640x380")
+
+    records = []
+    for i, (key, datum) in enumerate(sorted(data.items()), 1):
+      records.append(f'{i} : {key[0]} - {key[1]} = {datum[0]}回, 居残り:{datum[1]}分')
+
+    listvar = tk.StringVar(value=tuple(records))
+
+    listbox = tk.Listbox(
+      self.master,
+      width = 100,
+      height = 20,
+      selectmode = 'single',
+      listvariable=listvar
+    )
+    listbox.pack()
+
+if __name__ == "__main__":
+  data = {
+    ('生徒B', '幅跳び'): (30, 0),
+    ('生徒A', 'ハードル50m走'): (5, 90)
+  }
+
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+
+<----- sample_list1.py ----->
+
+
+コードを実行して、dataの内容を表示するリストボックスが画面に表示されていることを確認します。
+
+
+注)
+細かいことを考え始めると、
+・データの数に応じてリストボックスの大きさを変える
+・データが増えた場合にスクロールバーを追加する
+など細かい改善する箇所はいろいろでてきます。
+
+----------
+
+data変数からListboxに表示するデータを作成するところまでできたので、
+これを別の画面からモーダルウィンドウで表示することを考えてみます。
+
+sample_combobox5.pyをベースにして、以下のコードを追加します。
+
+・[表示]ボタンを追加して、サブウインドウを表示するコードを追記する
+・サブウィンドウの構成は、sample_list.pyのコードのListboxのコードと同じにする
+
+
+
+<----- sample_list2.py ---->
+import tkinter as tk
+import tkinter.ttk as ttk
+
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("Combobox")
+    self.master.geometry("400x200")
+
+    self.combobox1 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = ["生徒" + chr(ord('A') + i) for i in range(26)])
+    self.combobox1.pack(side=tk.LEFT)
+
+
+    sport_discipline = ["ハードル50m走", "1000m走", "幅跳び"]
+
+    self.combobox2 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = sport_discipline)
+    self.combobox2.pack(side=tk.LEFT)
+
+
+    self.entry1 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    self.entry1.pack(side=tk.LEFT)
+
+    self.entry2 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    self.entry2.pack(side=tk.LEFT)
+
+
+    button = tk.Button(
+      self.master,
+      text = "追加",
+      command = self.add_record)
+    button.pack()
+
+    button_view = tk.Button(
+      self.master,
+      text = "表示",
+      command = self.view_data)
+    button_view.pack()
+
+
+  def add_record(self):
+    print("add_record()")
+    print(self.combobox1.get())
+    print(self.combobox2.get())
+    print(self.entry1.get())
+    print(self.entry2.get())
+
+    # キーと値を用意します(エラー処理は省略)
+    key = (self.combobox1.get(), self.combobox2.get())
+    val = (self.entry1.get(), self.entry2.get())
+
+    # 辞書にデータを追加(キーが同じ場合は更新)
+    data.update({key: val})
+
+    # キーで昇順ソートをしたデータを出力します
+    print(sorted(data.items()))
+
+
+  def view_data(self):
+    subwindow = tk.Toplevel(self)
+    subwindow.title("List")
+    subwindow.geometry("640x380")
+
+    records = []
+    for i, (key, datum) in enumerate(sorted(data.items()), 1):
+      records.append(f'{i} : {key[0]} - {key[1]} = {datum[0]}回, 居残り:{datum[1]}分')
+
+    listvar = tk.StringVar(value=tuple(records))
+
+    listbox = tk.Listbox(
+      subwindow,
+      width = 100,
+      height = 20,
+      selectmode = 'single',
+      listvariable=listvar
+    )
+    listbox.pack()
+
+    # モーダルに設定する
+    subwindow.grab_set()
+    subwindow.focus_set()
+    subwindow.transient(self.master)
+
+    app.wait_window(subwindow)
+
+
+if __name__ == "__main__":
+  # データを保存する辞書
+  data = {}
+
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+
+<----- sample_list2.py ---->
+
+
+データをいくつか登録して、"表示"ボタンを押すと登録したデータをリストアップした
+モーダルウインドウが表示されることを確認します。
+
+
+データ削除とGUIのレイアウトについては、いろいろ試してみながら実装してみてください。
+
+
+
+

@@ -1,0 +1,349 @@
+GUIを作りましょう その1
+2023.2.4
+
+
+まずは生徒A～生徒Zを選択するコンボボックスを作成します。
+
+コンボボックスに引数として渡す"生徒A", "生徒B", "生徒C", ... "生徒Z"のリストを作成する必要があります。
+
+ベタ書きするのは面倒なので、for文で作成します。
+
+A～Zを出力するのは、以下のようなコードです。
+
+print([chr(ord('A') + i) for i in range(26)])
+
+実行結果は、以下のようになります。
+['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+--
+
+生徒を追加すると、以下のコードとなります。
+print(["生徒" + chr(ord('A') + i) for i in range(26)])
+
+実行結果は以下のようになります。
+['生徒A', '生徒B', '生徒C', '生徒D', '生徒E', '生徒F', '生徒G', '生徒H', '生徒I', '生徒J', '生徒K', '生徒L', '生徒M', '生徒N', '生徒O', '生徒P', '生徒Q', '生徒R', '生徒S', '生徒T', '生徒U', '生徒V', '生徒W', '生徒X', '生徒Y', '生徒Z']
+
+
+これでコンボボックスに渡すリストが生成できました。
+
+
+--
+
+生徒A～生徒Zを選択するコンボボックスのサンプルコードは以下のようになります。
+
+<----- sample_combobox.py ----->
+import tkinter as tk
+import tkinter.ttk as ttk
+
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("Combobox")
+    self.master.geometry("300x200")
+
+    
+    combobox = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = ["生徒" + chr(ord('A') + i) for i in range(26)])
+    combobox.pack()
+
+if __name__ == "__main__":
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+<----- sample_combobox.py ----->
+
+
+-----
+
+次の種目をコンボボックスを作成します。
+
+種目はベタ書きするしかないと思うので、素直にリストを用意して対応すればよいでしょう。
+
+sport_discipline = ["ハードル50m走", "1000m走", "幅跳び"]
+
+
+コンボボックスを横に並べるには、pack()の引数にside=tk.LEFTを追加しました。
+ピッタリくっついてしまうので、ちょっとカッコ悪いですが、まずはこのまま進めます。
+
+<----- sample_combobox2.py ----->
+import tkinter as tk
+import tkinter.ttk as ttk
+
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("Combobox")
+    self.master.geometry("300x200")
+
+    combobox1 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = ["生徒" + chr(ord('A') + i) for i in range(26)])
+    combobox1.pack(side=tk.LEFT)
+
+
+    sport_discipline = ["ハードル50m走", "1000m走", "幅跳び"]
+
+    combobox2 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = sport_discipline)
+    combobox2.pack(side=tk.LEFT)
+
+if __name__ == "__main__":
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+<----- sample_combobox2.py ----->
+
+
+-----
+
+
+回数と時間を入力するための項目を追加します。
+
+数字のみを入力できるようにしたほうがよいのですが、かなり手間がかかるので数字以外も入力できるようにしておいて
+データを追加・削除するタイミングで数字かどうかを確かめるようにします。
+
+コンボボックスの隣に2つのEntryを追加してみます。
+数字なので右寄せにしています。(justify=tk.RIGH)
+
+(横幅が足りなくなったので、geometry()のパラメータを変更しました)
+
+
+<----- sample_combobox3.py ----->
+import tkinter as tk
+import tkinter.ttk as ttk
+
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("Combobox")
+    self.master.geometry("400x200")
+
+    combobox1 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = ["生徒" + chr(ord('A') + i) for i in range(26)])
+    combobox1.pack(side=tk.LEFT)
+
+
+    sport_discipline = ["ハードル50m走", "1000m走", "幅跳び"]
+
+    combobox2 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = sport_discipline)
+    combobox2.pack(side=tk.LEFT)
+
+
+    entry1 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    entry1.pack(side=tk.LEFT)
+
+    entry2 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    entry2.pack(side=tk.LEFT)
+
+
+if __name__ == "__main__":
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+<----- sample_combobox3.py ----->
+
+
+-----
+
+
+追加ボタンを追加して、ボタンが押されたらデータ構造に対してデータを追加するコードを書いてみます。
+キーが生徒と種目のタプル、データは回数と時間のテキストデータです。
+(このコードでは、簡略化のため数字かどうかのチェックはおこないません)
+
+"追加"ボタンを追加します(ややこしいなww)
+
+追加ボタンを押された時の処理をコールバック関数で書きますが、この時コンボボックスとEntryの状態をチェックする必要があります。
+いままで作成したUIの変数(combbox1, combobox2, entry1, entry2をインスタンス変数にして、コールバック関数からアクセスできるようにします。
+
+簡単な例は、以下のサイトで解説しています。
+
+参考URL:
+・【Python】Tkinterのテンプレート
+https://qiita.com/kotai2003/items/fe9b5e59c7164a95ded8
+
+
+まずは、コールバック関数でUIの変数から値を取得してprintするコードを作成します。
+コンボボックスを選択して、entryにも文字を入力して、"追加"ボタンを押します。
+コールバック関数内で、それぞれのUIのget()を呼び出して、その結果を出力されていることを確認します。
+
+
+<---- sample_combobox4.py ----->
+import tkinter as tk
+import tkinter.ttk as ttk
+
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("Combobox")
+    self.master.geometry("400x200")
+
+    self.combobox1 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = ["生徒" + chr(ord('A') + i) for i in range(26)])
+    self.combobox1.pack(side=tk.LEFT)
+
+
+    sport_discipline = ["ハードル50m走", "1000m走", "幅跳び"]
+
+    self.combobox2 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = sport_discipline)
+    self.combobox2.pack(side=tk.LEFT)
+
+
+    self.entry1 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    self.entry1.pack(side=tk.LEFT)
+
+    self.entry2 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    self.entry2.pack(side=tk.LEFT)
+
+
+    button = tk.Button(
+      self.master,
+      text = "追加",
+      command = self.add_record)
+    button.pack()
+
+
+  def add_record(self):
+    print("add_record()")
+    print(self.combobox1.get())
+    print(self.combobox2.get())
+    print(self.entry1.get())
+    print(self.entry2.get())
+
+
+if __name__ == "__main__":
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+
+<---- sample_combobox4.py ----->
+
+
+-----
+
+
+次にコールバック関数を変更して、辞書にデータを追加するようにします。
+mainにdataという辞書変数を追加して、dataに対して新しいレコードを追加します。
+
+
+<---- sample_combobox5.py ----->
+import tkinter as tk
+import tkinter.ttk as ttk
+
+
+class Application(tk.Frame):
+  def __init__(self, master = None):
+    super().__init__(master)
+
+    self.master.title("Combobox")
+    self.master.geometry("400x200")
+
+    self.combobox1 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = ["生徒" + chr(ord('A') + i) for i in range(26)])
+    self.combobox1.pack(side=tk.LEFT)
+
+
+    sport_discipline = ["ハードル50m走", "1000m走", "幅跳び"]
+
+    self.combobox2 = ttk.Combobox(
+      self.master,
+      state = 'readonly',
+      value = sport_discipline)
+    self.combobox2.pack(side=tk.LEFT)
+
+
+    self.entry1 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    self.entry1.pack(side=tk.LEFT)
+
+    self.entry2 = ttk.Entry(
+      self.master,
+      justify=tk.RIGHT,
+      width=5)
+    self.entry2.pack(side=tk.LEFT)
+
+
+    button = tk.Button(
+      self.master,
+      text = "追加",
+      command = self.add_record)
+    button.pack()
+
+
+  def add_record(self):
+    print("add_record()")
+    print(self.combobox1.get())
+    print(self.combobox2.get())
+    print(self.entry1.get())
+    print(self.entry2.get())
+
+    # キーと値を用意します(エラー処理は省略)
+    key = (self.combobox1.get(), self.combobox2.get())
+    val = (self.entry1.get(), self.entry2.get())
+
+    # 辞書にデータを追加(キーが同じ場合は更新)
+    data.update({key: val})
+
+    # キーで昇順ソートをしたデータを出力します
+    print(sorted(data.items()))
+
+
+if __name__ == "__main__":
+  # データを保存する辞書
+  data = {}
+
+  root = tk.Tk()
+
+  app = Application(master = root)
+  app.mainloop()
+
+<---- sample_combobox5.py ----->
+
+
+これで、GUIの入力した結果を辞書に追加（更新）するコードとなりました。
+
+いくつかデータを追加(更新)して動作を確認してみましょう。
+
+
